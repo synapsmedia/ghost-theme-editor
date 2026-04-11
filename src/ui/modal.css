@@ -1,0 +1,408 @@
+/*
+ * All selectors are scoped under .gte-modal-root so we never leak styles into
+ * Ghost Admin's Ember or admin-x React trees. Colors are picked to read well
+ * on top of Ghost Admin's default background.
+ */
+
+.gte-modal-root {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    background: rgba(10, 11, 13, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #e6e7ea;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gte-modal-root *,
+.gte-modal-root *::before,
+.gte-modal-root *::after {
+    box-sizing: border-box;
+}
+
+.gte-modal {
+    margin: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #15171a;
+    border: 1px solid #2a2d33;
+    border-radius: 10px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+    min-height: 0;
+}
+
+.gte-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #23262c;
+    background: #1a1d21;
+    flex-shrink: 0;
+}
+
+.gte-toolbar__title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #f4f5f7;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.gte-toolbar__subtitle {
+    font-size: 12px;
+    color: #8a8f98;
+    font-weight: 400;
+}
+
+.gte-toolbar__spacer {
+    flex: 1;
+}
+
+.gte-toolbar__badge {
+    background: #2a2d33;
+    color: #c8ccd3;
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    line-height: 1;
+}
+
+.gte-toolbar__badge--dirty {
+    background: #3b2a16;
+    color: #f5a623;
+}
+
+.gte-btn {
+    appearance: none;
+    border: 1px solid transparent;
+    background: #2a2d33;
+    color: #e6e7ea;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 120ms ease, border-color 120ms ease;
+}
+.gte-btn:hover {
+    background: #343841;
+}
+.gte-btn:focus-visible {
+    outline: 2px solid #4a9eff;
+    outline-offset: 2px;
+}
+
+.gte-btn--primary {
+    background: #14b886;
+    color: #001410;
+    font-weight: 600;
+}
+.gte-btn--primary:hover {
+    background: #12a577;
+}
+.gte-btn--ghost {
+    background: transparent;
+    border-color: #2f333b;
+}
+.gte-btn--ghost:hover {
+    background: #1f2228;
+}
+.gte-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.gte-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ---------- File tree ---------- */
+
+.gte-tree {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid #23262c;
+    background: #16181c;
+    overflow: auto;
+    padding: 8px 0;
+    font-size: 13px;
+}
+
+.gte-tree__empty {
+    padding: 16px;
+    color: #8a8f98;
+    font-size: 12px;
+}
+
+.gte-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.gte-tree__node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 0;
+    cursor: pointer;
+    user-select: none;
+    color: #c8ccd3;
+    border-radius: 4px;
+    line-height: 1.3;
+    min-height: 24px;
+}
+.gte-tree__node:hover {
+    background: #1f2228;
+}
+.gte-tree__node--active {
+    background: #243043;
+    color: #ffffff;
+}
+.gte-tree__node--binary {
+    color: #6a6f78;
+    cursor: not-allowed;
+}
+.gte-tree__node--binary:hover {
+    background: transparent;
+}
+
+.gte-tree__chev {
+    width: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6a6f78;
+    flex-shrink: 0;
+}
+.gte-tree__chev--leaf {
+    visibility: hidden;
+}
+
+.gte-tree__icon {
+    display: inline-flex;
+    align-items: center;
+    color: #8a8f98;
+    flex-shrink: 0;
+}
+.gte-tree__label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.gte-tree__dirty {
+    width: 6px;
+    height: 6px;
+    background: #f5a623;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: 6px;
+}
+
+/* ---------- Editor pane ---------- */
+
+.gte-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: #15171a;
+}
+
+.gte-editor__breadcrumb {
+    padding: 10px 16px;
+    font-size: 12px;
+    color: #8a8f98;
+    border-bottom: 1px solid #23262c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #17191d;
+    flex-shrink: 0;
+}
+.gte-editor__breadcrumb strong {
+    color: #e6e7ea;
+    font-weight: 500;
+}
+.gte-editor__breadcrumb .gte-lang {
+    margin-left: auto;
+    background: #2a2d33;
+    color: #c8ccd3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.gte-editor__placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6a6f78;
+    font-size: 13px;
+    padding: 32px;
+    text-align: center;
+}
+
+.gte-editor__monaco {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* ---------- Banner / error ---------- */
+
+.gte-banner {
+    padding: 10px 16px;
+    font-size: 12px;
+    border-top: 1px solid #23262c;
+    background: #1b1d22;
+    color: #c8ccd3;
+    flex-shrink: 0;
+}
+.gte-banner--error {
+    background: #3a1d1d;
+    color: #ffbdbd;
+}
+.gte-banner--success {
+    background: #17342a;
+    color: #a5e8c8;
+}
+
+/* ---------- Loading state ---------- */
+
+.gte-loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8a8f98;
+    font-size: 13px;
+    flex-direction: column;
+    gap: 12px;
+}
+.gte-spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #2a2d33;
+    border-top-color: #14b886;
+    border-radius: 50%;
+    animation: gte-spin 0.8s linear infinite;
+}
+@keyframes gte-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---------- Inject button in Ghost menu ---------- */
+
+.gte-injected-item {
+    /* We copy the Download button's classes at injection time, this class is
+       just a hook / marker so we can find it again. */
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+.gte-injected-item[data-gte-edit-button] {
+    /* Nothing visual — classes copied from Ghost's button do the work. */
+}
+
+/* ---------- Context menu ---------- */
+
+.gte-context-menu {
+    position: fixed;
+    z-index: 2147483002;
+    background: #1f2228;
+    border: 1px solid #2f333b;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    min-width: 160px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    color: #e6e7ea;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gte-context-menu__item {
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.gte-context-menu__item:hover {
+    background: #2a2d33;
+}
+.gte-context-menu__item--danger {
+    color: #ff6b6b;
+}
+.gte-context-menu__item--danger:hover {
+    background: #3a1d1d;
+}
+
+/* ---------- Toast ---------- */
+
+.gte-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #15171a;
+    color: #e6e7ea;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid #2a2d33;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    z-index: 2147483001;
+    max-width: 380px;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+.gte-toast--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.gte-toast--success {
+    border-color: #14b886;
+}
+.gte-toast--error {
+    border-color: #e24b4b;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 820px) {
+    .gte-modal {
+        margin: 0;
+        border-radius: 0;
+    }
+    .gte-body {
+        flex-direction: column;
+    }
+    .gte-tree {
+        width: 100%;
+        height: 180px;
+        border-right: none;
+        border-bottom: 1px solid #23262c;
+    }
+}

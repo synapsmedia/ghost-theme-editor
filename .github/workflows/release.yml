@@ -1,0 +1,47 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Purge jsDelivr cache
+        uses: gacts/purge-jsdelivr-cache@v1
+        with:
+          url: |
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor/dist/ghost-theme-editor.js
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor/dist/ghost-theme-editor.min.js
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@0/dist/ghost-theme-editor.js
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@0/dist/ghost-theme-editor.min.js
+
