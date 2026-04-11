@@ -1,6 +1,8 @@
 # Ghost Theme Editor
 
-A browser-based Ghost theme editor that injects itself into Ghost Admin and lets you edit, create, rename, and delete theme files directly in your browser — no ZIP downloads, no local tooling, no redeploy cycle. Useful for live fixes, quick tweaks, and authoring themes on any device.
+<img width="1133" height="611" alt="image" src="https://github.com/user-attachments/assets/e5d14c1e-54c1-480e-9a64-413531a861ef" />
+
+A browser-based [Ghost](https://github.com/TryGhost/Ghost) theme editor that injects itself into Ghost Admin and lets you edit, create, rename, and delete theme files directly in your browser — no ZIP downloads, no local tooling, no redeploy cycle. Useful for live fixes, quick tweaks, and authoring themes on any device.
 
 - **Monaco editor** — the same editor engine as VS Code, with syntax highlighting for Handlebars, CSS, JavaScript, JSON, YAML, and more.
 - **Full file management** — right-click any file or folder in the tree to create, rename, or delete. New files open immediately for editing.
@@ -9,7 +11,10 @@ A browser-based Ghost theme editor that injects itself into Ghost Admin and lets
 - **Same-origin auth** — reuses Ghost Admin's existing session cookie; no re-authentication.
 - **Non-destructive** — Ghost automatically validates the theme before replacing it. The editor confirms every upload and keeps unsaved changes visible until you explicitly discard them.
 
-## Quick install via jsDelivr (recommended)
+## Usage
+
+> [!TIP]
+> If you are hosting your Ghost site on [Synaps Media](https://www.synapsmedia.com), Ghost Theme Editor is already installed. Enjoy!
 
 The package is published to npm as [`@synapsmedia/ghost-theme-editor`](https://www.npmjs.com/package/@synapsmedia/ghost-theme-editor) and served via jsDelivr — no build step needed.
 
@@ -87,6 +92,8 @@ Ghost's `clientExtensions.script` config lets an operator specify a JavaScript f
 - Ability to edit Ghost's `config.production.json` (or equivalent env vars).
 
 ## Using the editor
+
+<img width="1069" height="475" alt="image" src="https://github.com/user-attachments/assets/e265768f-53da-43d5-8162-890d9cf36b74" />
 
 1. Click **Edit in Browser** from any theme's "…" menu.
 2. The editor downloads the theme ZIP via `/ghost/api/admin/themes/<name>/download` (session cookie, same origin — no re-auth required).
