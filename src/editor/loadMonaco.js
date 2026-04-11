@@ -14,7 +14,7 @@
  * cross-origin CDN scripts are allowed in all modern browsers.
  */
 
-const MONACO_VERSION = '0.50.0';
+const MONACO_VERSION = '0.55.1';
 const MONACO_CDN = `https://cdn.jsdelivr.net/npm/monaco-editor@${MONACO_VERSION}/min/vs`;
 
 let _promise = null;
