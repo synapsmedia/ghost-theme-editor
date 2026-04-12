@@ -30,12 +30,18 @@ export class FileTree {
         this.onRename = onRename;
         this.onDelete = onDelete;
         this.expanded = new Set(['']); // '' is the root, always open
+        this.selectedPath = null;
+        this.selectedType = null;
         this._contextMenu = null;
         this._onDocMouseDown = this._onDocMouseDown.bind(this);
+        this._onKeyDown = this._onKeyDown.bind(this);
 
         this.el = document.createElement('nav');
         this.el.className = 'gte-tree';
         this.el.setAttribute('aria-label', 'Theme files');
+        this.el.setAttribute('tabindex', '0');
+        this.el.setAttribute('role', 'tree');
+        this.el.addEventListener('keydown', this._onKeyDown);
 
         // Right-click on empty tree area → root-level create actions
         this.el.addEventListener('contextmenu', (e) => {
@@ -103,6 +109,129 @@ export class FileTree {
         document.removeEventListener('mousedown', this._onDocMouseDown, true);
     }
 
+    _dirExists(path) {
+        for (const filePath of Object.keys(this.files)) {
+            if (filePath.startsWith(path)) return true;
+        }
+        return false;
+    }
+
+    _findActivePath() {
+        if (!this.isActive) return null;
+        for (const filePath of Object.keys(this.files)) {
+            if (this.isActive(filePath)) return filePath;
+        }
+        return null;
+    }
+
+    _ensureSelection() {
+        const selectedIsFile = this.selectedType === 'file' && this.selectedPath && this.files[this.selectedPath];
+        const selectedIsDir = this.selectedType === 'dir' && this.selectedPath && this._dirExists(this.selectedPath);
+        if (selectedIsFile || selectedIsDir) return;
+
+        this.selectedPath = null;
+        this.selectedType = null;
+
+        const activePath = this._findActivePath();
+        if (activePath) {
+            this.selectedPath = activePath;
+            this.selectedType = 'file';
+        }
+    }
+
+    _setSelection(path, type) {
+        this.selectedPath = path;
+        this.selectedType = type;
+    }
+
+    _selectedRowElement() {
+        if (!this.selectedPath || !this.selectedType) return null;
+        return this.el.querySelector(`.gte-tree__node[data-path="${CSS.escape(this.selectedPath)}"][data-type="${this.selectedType}"]`);
+    }
+
+    _visibleRows() {
+        return Array.from(this.el.querySelectorAll('.gte-tree__node'));
+    }
+
+    _selectRowAtIndex(rows, index) {
+        const row = rows[index];
+        if (!row) return;
+        this._setSelection(row.dataset.path, row.dataset.type);
+        this.render();
+        this._selectedRowElement()?.scrollIntoView({block: 'nearest'});
+    }
+
+    _onKeyDown(e) {
+        if (e.defaultPrevented) return;
+        const rows = this._visibleRows();
+        if (!rows.length) return;
+
+        const currentIndex = this.selectedPath && this.selectedType
+            ? rows.findIndex((row) => row.dataset.path === this.selectedPath && row.dataset.type === this.selectedType)
+            : -1;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = currentIndex < 0 ? 0 : Math.min(rows.length - 1, currentIndex + 1);
+            this._selectRowAtIndex(rows, nextIndex);
+            return;
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = currentIndex < 0 ? rows.length - 1 : Math.max(0, currentIndex - 1);
+            this._selectRowAtIndex(rows, prevIndex);
+            return;
+        }
+
+        if (e.key === 'ArrowRight') {
+            if (this.selectedType !== 'dir' || !this.selectedPath) return;
+            e.preventDefault();
+            if (!this.expanded.has(this.selectedPath)) {
+                this.expanded.add(this.selectedPath);
+                this.render();
+            }
+            return;
+        }
+
+        if (e.key === 'ArrowLeft') {
+            if (this.selectedType !== 'dir' || !this.selectedPath) return;
+            e.preventDefault();
+            if (this.expanded.has(this.selectedPath)) {
+                this.expanded.delete(this.selectedPath);
+                this.render();
+            }
+            return;
+        }
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!this.selectedPath || !this.selectedType) return;
+            if (this.selectedType === 'dir') {
+                if (this.expanded.has(this.selectedPath)) this.expanded.delete(this.selectedPath);
+                else this.expanded.add(this.selectedPath);
+                this.render();
+                return;
+            }
+            const file = this.files[this.selectedPath];
+            if (file?.editable) this.onSelect?.(this.selectedPath);
+            return;
+        }
+
+        if (e.key === 'F2') {
+            if (!this.selectedPath || !this.selectedType) return;
+            e.preventDefault();
+            this.onRename?.(this.selectedPath, this.selectedType);
+            return;
+        }
+
+        if (e.key === 'Delete') {
+            if (!this.selectedPath || !this.selectedType) return;
+            e.preventDefault();
+            this.onDelete?.(this.selectedPath, this.selectedType);
+        }
+    }
+
     /**
      * Build a nested structure:
      *   { type: 'dir', name, path, children: { name → node } }
@@ -153,6 +282,7 @@ export class FileTree {
     }
 
     render() {
+        this._ensureSelection();
         this.el.innerHTML = '';
         if (Object.keys(this.files).length === 0) {
             const empty = document.createElement('div');
@@ -179,6 +309,14 @@ export class FileTree {
             const row = document.createElement('div');
             row.className = 'gte-tree__node';
             row.style.paddingLeft = `${8 + depth * 12}px`;
+            row.dataset.path = node.path;
+            row.dataset.type = node.type;
+            row.setAttribute('role', 'treeitem');
+            row.setAttribute('aria-selected', this.selectedPath === node.path && this.selectedType === node.type ? 'true' : 'false');
+
+            if (this.selectedPath === node.path && this.selectedType === node.type) {
+                row.classList.add('gte-tree__node--selected');
+            }
 
             const chev = document.createElement('span');
             chev.className = 'gte-tree__chev';
@@ -195,12 +333,17 @@ export class FileTree {
                 row.appendChild(chev);
                 row.appendChild(iconWrap);
                 row.appendChild(label);
+                row.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                row.addEventListener('mousedown', () => this.el.focus());
                 row.addEventListener('click', () => {
+                    this._setSelection(node.path, 'dir');
                     if (this.expanded.has(node.path)) this.expanded.delete(node.path);
                     else this.expanded.add(node.path);
                     this.render();
                 });
                 row.addEventListener('contextmenu', (e) => {
+                    this._setSelection(node.path, 'dir');
+                    this.render();
                     this._showContextMenu(e, [
                         {label: 'New File', action: () => this.onCreateFile?.(node.path)},
                         {label: 'New Folder', action: () => this.onCreateFolder?.(node.path)},
@@ -222,6 +365,7 @@ export class FileTree {
                 row.appendChild(chev);
                 row.appendChild(iconWrap);
                 row.appendChild(label);
+                row.removeAttribute('aria-expanded');
 
                 if (file.modified) {
                     const dot = document.createElement('span');
@@ -239,10 +383,15 @@ export class FileTree {
                     row.classList.add('gte-tree__node--active');
                 }
 
+                row.addEventListener('mousedown', () => this.el.focus());
                 row.addEventListener('click', () => {
+                    this._setSelection(file.path, 'file');
                     if (editable && this.onSelect) this.onSelect(file.path);
+                    this.render();
                 });
                 row.addEventListener('contextmenu', (e) => {
+                    this._setSelection(file.path, 'file');
+                    this.render();
                     this._showContextMenu(e, [
                         {label: 'Rename', action: () => this.onRename?.(node.path, 'file')},
                         {label: 'Delete', action: () => this.onDelete?.(node.path, 'file'), danger: true}
