@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.3.0...v0.4.0) (2026-04-12)
+
+
+### Features
+
+* add diff review workflow in editor modal ([#2](https://github.com/synapsmedia/ghost-theme-editor/issues/2)) ([d751f67](https://github.com/synapsmedia/ghost-theme-editor/commit/d751f67eb2286e7e8dabee3308cfc6c38750a4c6))
+
 # [0.3.0](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.2.2...v0.3.0) (2026-04-12)
 
 
