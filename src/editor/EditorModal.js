@@ -446,6 +446,17 @@ export class EditorModal {
         if (!file || !file.editable) return;
         if (file.content === file.original) return;
 
+        if (file.isNew) {
+            delete this.tree.files[path];
+            if (this.activePath === path) {
+                this.activePath = null;
+                this.fileEditor.setFile(null);
+            }
+            this.fileTree.refresh();
+            this.updateDirtyBadge();
+            return;
+        }
+
         file.content = file.original ?? '';
         file.modified = false;
 
@@ -913,8 +924,20 @@ export class EditorModal {
         const ok = window.confirm(`Revert all ${total} change${total === 1 ? '' : 's'}?`);
         if (!ok) return;
 
+        let clearedActive = false;
         for (const [path, file] of Object.entries(this.tree.files)) {
-            if (!file.editable || !file.modified) continue;
+            if (!file.modified) continue;
+
+            if (file.isNew) {
+                delete this.tree.files[path];
+                if (this.activePath === path) {
+                    this.activePath = null;
+                    clearedActive = true;
+                }
+                continue;
+            }
+
+            if (!file.editable) continue;
             file.content = file.original ?? '';
             file.modified = false;
             if (this.activePath === path) {
@@ -922,6 +945,10 @@ export class EditorModal {
                     originalContent: file.original ?? ''
                 });
             }
+        }
+
+        if (clearedActive) {
+            this.fileEditor.setFile(null);
         }
 
         const restorable = this.deletedEntries.filter((entry) => !entry.binary);
