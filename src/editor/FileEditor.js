@@ -328,6 +328,21 @@ export class FileEditor {
     }
 
     dispose() {
+        // Dispose editors first so they release model references before models
+        // are torn down. Disposing models while DiffEditorWidget still holds
+        // them triggers "TextModel got disposed before DiffEditorWidget model
+        // got reset" because the editor tries to reset its model in response to
+        // the disposal event fired by the model itself.
+        if (this._diffEditor) {
+            this._diffEditor.setModel(null);
+            this._diffEditor.dispose();
+            this._diffEditor = null;
+        }
+        if (this._editor) {
+            this._editor.setModel(null);
+            this._editor.dispose();
+            this._editor = null;
+        }
         for (const sub of this._modelSubscriptions.values()) {
             sub.dispose();
         }
@@ -340,13 +355,5 @@ export class FileEditor {
             model.dispose();
         }
         this._originalModels.clear();
-        if (this._editor) {
-            this._editor.dispose();
-            this._editor = null;
-        }
-        if (this._diffEditor) {
-            this._diffEditor.dispose();
-            this._diffEditor = null;
-        }
     }
 }
