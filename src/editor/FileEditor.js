@@ -25,9 +25,14 @@ export class FileEditor {
     constructor({onChange}) {
         this.onChange = onChange;
         this.currentPath = null;
-        this._editor = null;            // monaco.editor.IStandaloneCodeEditor
-        this._models = new Map();       // path → monaco.editor.ITextModel
-        this._creating = false;         // guard against concurrent create calls
+        this._editor = null;                 // monaco.editor.IStandaloneCodeEditor
+        this._diffEditor = null;             // monaco.editor.IStandaloneDiffEditor
+        this._models = new Map();            // path → modified ITextModel
+        this._originalModels = new Map();    // path → original ITextModel
+        this._modelSubscriptions = new Map();// path → IDisposable
+        this._creating = false;              // guard against concurrent create calls
+        this._creatingDiff = false;
+        this.viewMode = 'edit';
 
         this.el = document.createElement('div');
         this.el.className = 'gte-editor';
@@ -52,6 +57,11 @@ export class FileEditor {
         this.monacoContainer.className = 'gte-editor__monaco';
         this.monacoContainer.style.display = 'none';
         this.body.appendChild(this.monacoContainer);
+
+        this.diffContainer = document.createElement('div');
+        this.diffContainer.className = 'gte-editor__diff';
+        this.diffContainer.style.display = 'none';
+        this.body.appendChild(this.diffContainer);
 
         this.renderBreadcrumb(null);
 
@@ -92,27 +102,125 @@ export class FileEditor {
                 }
             });
 
-            this._editor.onDidChangeModelContent(() => {
-                if (this.currentPath && this.onChange) {
-                    this.onChange(this.currentPath, this._editor.getValue());
-                }
-            });
         } finally {
             this._creating = false;
         }
     }
 
-    _applyFile(path, content) {
+    async _createDiffEditor() {
+        if (this._diffEditor || this._creatingDiff) return;
+        this._creatingDiff = true;
+        try {
+            const monaco = await loadMonaco();
+            if (this._diffEditor) return;
+
+            this._diffEditor = monaco.editor.createDiffEditor(this.diffContainer, {
+                automaticLayout: true,
+                minimap: {enabled: false},
+                scrollBeyondLastLine: false,
+                wordWrap: 'off',
+                theme: 'vs-dark',
+                fontSize: 13,
+                lineHeight: 20,
+                fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace',
+                renderSideBySide: true,
+                renderOverviewRuler: false,
+                readOnly: false,
+                originalEditable: false,
+                renderIndicators: true,
+                overviewRulerLanes: 0,
+                scrollbar: {
+                    verticalScrollbarSize: 8,
+                    horizontalScrollbarSize: 8
+                }
+            });
+
+            this._diffEditor.getOriginalEditor().updateOptions({
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: true,
+                scrollbar: {
+                    vertical: 'hidden',
+                    horizontal: 'hidden',
+                    verticalScrollbarSize: 0,
+                    horizontalScrollbarSize: 0
+                }
+            });
+            this._diffEditor.getModifiedEditor().updateOptions({
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: true,
+                scrollbar: {
+                    verticalScrollbarSize: 8,
+                    horizontalScrollbarSize: 8
+                }
+            });
+        } finally {
+            this._creatingDiff = false;
+        }
+    }
+
+    _ensureModels(path, content, originalContent) {
         const monaco = window.monaco;
         const language = languageFor(path);
-        let model = this._models.get(path);
-        if (!model) {
-            model = monaco.editor.createModel(content ?? '', language);
-            this._models.set(path, model);
-        } else if (model.getValue() !== (content ?? '')) {
-            model.setValue(content ?? '');
+
+        let modifiedModel = this._models.get(path);
+        if (!modifiedModel) {
+            modifiedModel = monaco.editor.createModel(content ?? '', language);
+            this._models.set(path, modifiedModel);
+            const sub = modifiedModel.onDidChangeContent(() => {
+                if (this.currentPath === path && this.onChange) {
+                    this.onChange(path, modifiedModel.getValue());
+                }
+                if (this.currentPath === path) this.renderBreadcrumb(path);
+            });
+            this._modelSubscriptions.set(path, sub);
+        } else if ((content ?? '') !== modifiedModel.getValue()) {
+            modifiedModel.setValue(content ?? '');
         }
-        this._editor.setModel(model);
+
+        let baselineModel = this._originalModels.get(path);
+        if (!baselineModel) {
+            baselineModel = monaco.editor.createModel(originalContent ?? content ?? '', language);
+            this._originalModels.set(path, baselineModel);
+        } else if (originalContent !== undefined && (originalContent ?? '') !== baselineModel.getValue()) {
+            baselineModel.setValue(originalContent ?? '');
+        }
+
+        return {modifiedModel, baselineModel};
+    }
+
+    _canShowDiff(path) {
+        if (!path) return false;
+        const modifiedModel = this._models.get(path);
+        const baselineModel = this._originalModels.get(path);
+        if (!modifiedModel || !baselineModel) return false;
+        return modifiedModel.getValue() !== baselineModel.getValue();
+    }
+
+    _syncEditorVisibility({focus = false} = {}) {
+        const canDiff = this._canShowDiff(this.currentPath);
+        const showDiff = this.viewMode === 'diff' && canDiff;
+
+        this.monacoContainer.style.display = showDiff ? 'none' : 'block';
+        this.diffContainer.style.display = showDiff ? 'block' : 'none';
+
+        if (focus) {
+            if (showDiff) {
+                this._diffEditor?.getModifiedEditor().focus();
+            } else {
+                this._editor?.focus();
+            }
+        }
+    }
+
+    _applyFile(path, content, originalContent) {
+        const {modifiedModel, baselineModel} = this._ensureModels(path, content, originalContent);
+        this._editor.setModel(modifiedModel);
+        if (this._diffEditor) {
+            this._diffEditor.setModel({
+                original: baselineModel,
+                modified: modifiedModel
+            });
+        }
     }
 
     renderBreadcrumb(path) {
@@ -132,7 +240,50 @@ export class FileEditor {
         const lang = document.createElement('span');
         lang.className = 'gte-lang';
         lang.textContent = languageFor(path);
-        this.breadcrumb.appendChild(lang);
+
+        const controls = document.createElement('div');
+        controls.className = 'gte-editor__controls';
+        controls.appendChild(lang);
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = `gte-editor__view-btn${this.viewMode === 'edit' || !this._canShowDiff(path) ? ' gte-editor__view-btn--active' : ''}`;
+        editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', () => this.setViewMode('edit'));
+        controls.appendChild(editBtn);
+
+        const diffBtn = document.createElement('button');
+        diffBtn.type = 'button';
+        diffBtn.className = `gte-editor__view-btn${this.viewMode === 'diff' && this._canShowDiff(path) ? ' gte-editor__view-btn--active' : ''}`;
+        diffBtn.textContent = 'Diff';
+        diffBtn.disabled = !this._canShowDiff(path);
+        diffBtn.addEventListener('click', () => this.setViewMode('diff'));
+        controls.appendChild(diffBtn);
+
+        this.breadcrumb.appendChild(controls);
+    }
+
+    setViewMode(mode) {
+        if (mode !== 'edit' && mode !== 'diff') return;
+        this.viewMode = mode;
+        if (this.currentPath) {
+            this._syncEditorVisibility();
+            this.renderBreadcrumb(this.currentPath);
+        }
+    }
+
+    updateOriginal(path, originalContent) {
+        const model = this._originalModels.get(path);
+        if (model && model.getValue() !== (originalContent ?? '')) {
+            model.setValue(originalContent ?? '');
+        }
+        if (this.currentPath === path) {
+            if (this.viewMode === 'diff' && !this._canShowDiff(path)) {
+                this.viewMode = 'edit';
+            }
+            this._syncEditorVisibility();
+            this.renderBreadcrumb(path);
+        }
     }
 
     /**
@@ -142,29 +293,34 @@ export class FileEditor {
      * Returns a Promise that resolves once the model is set, but callers may
      * treat it as fire-and-forget.
      */
-    async setFile(path, content, {focus = false} = {}) {
+    async setFile(path, content, {focus = false, originalContent} = {}) {
+        const requestedPath = path;
         this.currentPath = path;
 
         if (path === null) {
             this.monacoContainer.style.display = 'none';
             this.placeholder.style.display = 'flex';
+            this.diffContainer.style.display = 'none';
             this.renderBreadcrumb(null);
             return;
         }
 
         // Show the container BEFORE creating the editor so Monaco can measure it.
         this.monacoContainer.style.display = 'block';
+        this.diffContainer.style.display = 'none';
         this.placeholder.style.display = 'none';
         this.renderBreadcrumb(path);
 
         await this._createEditor();
+        await this._createDiffEditor();
 
         // If the user switched files while we were awaiting, apply the latest
         // requested path rather than the one that triggered this call.
-        if (this.currentPath !== null) {
-            this._applyFile(this.currentPath, content);
-            if (focus) this._editor.focus();
-        }
+        if (this.currentPath !== requestedPath || this.currentPath === null) return;
+
+        this._applyFile(requestedPath, content, originalContent);
+        this._syncEditorVisibility({focus});
+        this.renderBreadcrumb(requestedPath);
     }
 
     getValue() {
@@ -172,13 +328,25 @@ export class FileEditor {
     }
 
     dispose() {
+        for (const sub of this._modelSubscriptions.values()) {
+            sub.dispose();
+        }
+        this._modelSubscriptions.clear();
         for (const model of this._models.values()) {
             model.dispose();
         }
         this._models.clear();
+        for (const model of this._originalModels.values()) {
+            model.dispose();
+        }
+        this._originalModels.clear();
         if (this._editor) {
             this._editor.dispose();
             this._editor = null;
+        }
+        if (this._diffEditor) {
+            this._diffEditor.dispose();
+            this._diffEditor = null;
         }
     }
 }

@@ -68,12 +68,29 @@
 }
 
 .gte-toolbar__badge {
+    appearance: none;
+    border: 1px solid transparent;
     background: #2a2d33;
     color: #c8ccd3;
     font-size: 11px;
     padding: 4px 9px;
     border-radius: 999px;
     line-height: 1;
+    cursor: pointer;
+}
+
+.gte-toolbar__badge:hover:not([disabled]) {
+    background: #343841;
+}
+
+.gte-toolbar__badge:focus-visible {
+    outline: 2px solid #4a9eff;
+    outline-offset: 2px;
+}
+
+.gte-toolbar__badge[disabled] {
+    opacity: 0.6;
+    cursor: default;
 }
 
 .gte-toolbar__badge--dirty {
@@ -258,7 +275,6 @@
     font-weight: 500;
 }
 .gte-editor__breadcrumb .gte-lang {
-    margin-left: auto;
     background: #2a2d33;
     color: #c8ccd3;
     padding: 2px 8px;
@@ -266,6 +282,40 @@
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+}
+
+.gte-editor__controls {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gte-editor__view-btn {
+    appearance: none;
+    border: 1px solid #2f333b;
+    background: #1f2228;
+    color: #c8ccd3;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.gte-editor__view-btn:hover {
+    background: #2a2d33;
+}
+
+.gte-editor__view-btn--active {
+    background: #243043;
+    border-color: #355070;
+    color: #ffffff;
+}
+
+.gte-editor__view-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .gte-editor__placeholder {
@@ -280,6 +330,12 @@
 }
 
 .gte-editor__monaco {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+.gte-editor__diff {
     flex: 1;
     min-height: 0;
     min-width: 0;
@@ -323,6 +379,10 @@
     border-radius: 10px;
     padding: 16px;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.gte-shortcuts__title {
+    margin: 0 0 12px;
 }
 
 .gte-shortcuts__title {
@@ -372,6 +432,198 @@
 .gte-shortcuts__copyright-link:hover,
 .gte-shortcuts__copyright-link:focus-visible {
     text-decoration: underline;
+}
+
+/* ---------- Review overlay ---------- */
+
+.gte-review {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 10, 14, 0.64);
+}
+
+.gte-review__panel {
+    width: min(1240px, calc(100% - 24px));
+    height: min(78vh, calc(100% - 24px));
+    display: flex;
+    flex-direction: column;
+    background: #171a20;
+    border: 1px solid #2b3038;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.gte-review__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #f4f5f7;
+}
+
+.gte-review__summary {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #9aa0aa;
+}
+
+.gte-review__layout {
+    margin-top: 12px;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 12px;
+}
+
+.gte-review__list {
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid #2a2d33;
+    border-radius: 8px;
+    background: #111319;
+    padding: 8px;
+}
+
+.gte-review__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: #d4d8de;
+    text-align: left;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+.gte-review__item:hover {
+    background: #1d2028;
+}
+
+.gte-review__item--active {
+    background: #243043;
+    border-color: #355070;
+}
+
+.gte-review__item-status {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border: 1px solid #2f333b;
+    border-radius: 999px;
+    padding: 2px 6px;
+    color: #aab1bb;
+}
+
+.gte-review__item-status--added {
+    color: #8ee0bd;
+    border-color: #2b6b53;
+}
+
+.gte-review__item-status--modified {
+    color: #f0c674;
+    border-color: #705b2a;
+}
+
+.gte-review__item-status--deleted {
+    color: #ff9ea0;
+    border-color: #7a3a3c;
+}
+
+.gte-review__item-path {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gte-review__diff-pane {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #2a2d33;
+    border-radius: 8px;
+    background: #111319;
+    overflow: hidden;
+}
+
+.gte-review__diff-header {
+    padding: 8px 10px;
+    border-bottom: 1px solid #2a2d33;
+    font-size: 12px;
+    color: #c8ccd3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gte-review__diff-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gte-review__diff-actions {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 8px;
+}
+
+.gte-review__btn {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.gte-review__diff {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.gte-review__diff .decorationsOverviewRuler,
+.gte-editor__diff .decorationsOverviewRuler {
+    display: none !important;
+}
+
+.gte-review__diff .diffOverview,
+.gte-editor__diff .diffOverview {
+    display: none !important;
+}
+
+.gte-review__actions {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gte-review__empty {
+    color: #8f95a1;
+    font-size: 12px;
+    padding: 12px;
+}
+
+@media (max-width: 900px) {
+    .gte-review__layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 180px 1fr;
+    }
+
+    .gte-review__panel {
+        width: calc(100% - 12px);
+        height: calc(100% - 12px);
+        padding: 12px;
+    }
 }
 
 /* ---------- Loading state ---------- */

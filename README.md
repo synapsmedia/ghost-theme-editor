@@ -5,6 +5,7 @@
 A browser-based [Ghost](https://github.com/TryGhost/Ghost) theme editor that injects itself into Ghost Admin and lets you edit, create, rename, and delete theme files directly in your browser — no ZIP downloads, no local tooling, no redeploy cycle. Useful for live fixes, quick tweaks, and authoring themes on any device.
 
 - **Monaco editor** — the same editor engine as VS Code, with syntax highlighting for Handlebars, CSS, JavaScript, JSON, YAML, and more.
+- **Diff + review workflow** — inspect per-file diffs in the editor and review all changed files from a dedicated changes panel before uploading.
 - **Full file management** — right-click any file or folder in the tree to create, rename, or delete. New files open immediately for editing.
 - **Default theme support** — Ghost's built-in themes (`casper`, `source`) can't be overwritten directly; the editor automatically uploads edits as a new `<theme>-edited` theme.
 - **Single JS file** — no runtime CDN dependencies beyond Monaco (loaded from jsDelivr on first open). Drop one URL into Ghost config and you're done.
@@ -98,20 +99,24 @@ Ghost's `clientExtensions.script` config lets an operator specify a JavaScript f
 1. Click **Edit in Browser** from any theme's "…" menu.
 2. The editor downloads the theme ZIP via `/ghost/api/admin/themes/<name>/download` (session cookie, same origin — no re-auth required).
 3. The file tree on the left shows every file. Editable text files (`.hbs`, `.css`, `.js`, `.json`, `.md`, `.txt`, `.svg`, `.yaml`, …) are clickable. Binary files (images, fonts, WOFF) appear grayed out and are preserved byte-for-byte through the round trip.
-4. Click any editable file to open it in the Monaco editor. A dot next to the filename marks it as modified. The toolbar shows "N files modified".
+4. Click any editable file to open it in the Monaco editor. A dot next to the filename marks it as modified. Use the breadcrumb's **Edit / Diff** toggle to inspect a per-file diff.
 5. **Right-click** any file or folder in the tree for a context menu:
    - **On a folder:** New File, New Folder, Rename, Delete
    - **On a file:** Rename, Delete
    - **On the tree background:** New File, New Folder (created at the root)
    - New files open immediately in the editor if the extension is editable.
    - Creating a folder adds a `.gitkeep` placeholder so it appears in the tree.
-6. Click **Save & Upload** when ready.
+6. Click the toolbar's modified-files badge to open the all-changes review panel.
+   - Review changed files in a list with status badges (`added`, `modified`, `deleted`).
+   - Open any file in a split diff viewer.
+   - Revert individual files or use **Revert all**.
+7. Click **Save & Upload** when ready.
    - You'll be asked to confirm the number of changed/added/deleted files.
    - The modified tree is repacked as a ZIP (JSZip, DEFLATE).
    - The ZIP is uploaded as `multipart/form-data` to `/ghost/api/admin/themes/upload`.
    - Ghost renames the existing theme folder as a backup, extracts the new ZIP, and re-activates the theme if it was active.
    - If you're editing a default Ghost theme (`casper`, `source`), the upload is redirected to `<theme>-edited` — a new theme is created with your changes while the original is left untouched.
-7. Cancel / press Esc / click the backdrop to close. Unsaved changes prompt for confirmation before discarding.
+8. Cancel / press Esc / click the backdrop to close. Unsaved changes prompt for confirmation before discarding.
 
 ## Architecture
 
@@ -193,7 +198,7 @@ Default Ghost themes (`casper`, `source`) cannot be overwritten. The editor will
 
 ## Limitations
 
-- **No diff view.** You can see which files are modified, but not what changed. Keep a copy of the theme on disk if you need an audit trail.
+- **Diff is text-only.** Editable text files support diff/review. Binary files are preserved byte-for-byte, but visual/binary diffs are not shown.
 - **No multi-user coordination.** If two people edit the same theme simultaneously, last writer wins. Ghost's backup-on-replace means the previous version is recoverable but not automatically merged.
 - **Theme validation is server-side.** Ghost's theme validator runs on upload. If your edits produce an invalid theme, the error messages are surfaced in the editor's banner so you can fix and retry.
 - **In-memory only.** Everything runs in browser memory, so the tab must stay open during editing. For very large themes with many binary assets, the initial download and extract may be slow.
