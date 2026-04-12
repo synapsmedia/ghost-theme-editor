@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.4.0...v0.4.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* js error when closing the main dialog ([46f1e5f](https://github.com/synapsmedia/ghost-theme-editor/commit/46f1e5f5455c972447f07efb91a210473a5d4021))
+
 # [0.4.0](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.3.0...v0.4.0) (2026-04-12)
 
 
