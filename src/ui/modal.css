@@ -117,6 +117,17 @@
 .gte-btn--ghost:hover {
     background: #1f2228;
 }
+.gte-btn--icon {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 .gte-btn[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
@@ -138,6 +149,11 @@
     overflow: auto;
     padding: 8px 0;
     font-size: 13px;
+}
+
+.gte-tree:focus-visible {
+    outline: 2px solid #4a9eff;
+    outline-offset: -2px;
 }
 
 .gte-tree__empty {
@@ -170,6 +186,9 @@
 .gte-tree__node--active {
     background: #243043;
     color: #ffffff;
+}
+.gte-tree__node--selected {
+    background: #202630;
 }
 .gte-tree__node--binary {
     color: #6a6f78;
@@ -283,6 +302,76 @@
 .gte-banner--success {
     background: #17342a;
     color: #a5e8c8;
+}
+
+/* ---------- Shortcuts overlay ---------- */
+
+.gte-shortcuts {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 10, 14, 0.64);
+}
+
+.gte-shortcuts__panel {
+    width: min(520px, calc(100% - 32px));
+    background: #171a20;
+    border: 1px solid #2b3038;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.gte-shortcuts__title {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #f4f5f7;
+}
+
+.gte-shortcuts__list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 14px;
+    margin: 0;
+}
+
+.gte-shortcuts__list dt {
+    color: #f0c674;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.gte-shortcuts__list dd {
+    margin: 0;
+    color: #c8ccd3;
+    font-size: 13px;
+}
+
+.gte-shortcuts__note {
+    margin: 12px 0 14px;
+    color: #8f95a1;
+    font-size: 12px;
+}
+
+.gte-shortcuts__copyright {
+    margin: 0 0 14px;
+    color: #7a808b;
+    font-size: 11px;
+}
+
+.gte-shortcuts__copyright-link {
+    color: #9cbdf4;
+    text-decoration: none;
+}
+
+.gte-shortcuts__copyright-link:hover,
+.gte-shortcuts__copyright-link:focus-visible {
+    text-decoration: underline;
 }
 
 /* ---------- Loading state ---------- */

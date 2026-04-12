@@ -68,6 +68,15 @@ export class EditorModal {
         spacer.className = 'gte-toolbar__spacer';
         this.toolbar.appendChild(spacer);
 
+        this.shortcutsBtn = document.createElement('button');
+        this.shortcutsBtn.type = 'button';
+        this.shortcutsBtn.className = 'gte-btn gte-btn--ghost gte-btn--icon';
+        this.shortcutsBtn.textContent = '?';
+        this.shortcutsBtn.title = 'Keyboard shortcuts';
+        this.shortcutsBtn.setAttribute('aria-label', 'Keyboard shortcuts');
+        this.shortcutsBtn.addEventListener('click', () => this.toggleShortcuts());
+        this.toolbar.appendChild(this.shortcutsBtn);
+
         this.cancelBtn = document.createElement('button');
         this.cancelBtn.type = 'button';
         this.cancelBtn.className = 'gte-btn gte-btn--ghost';
@@ -104,10 +113,89 @@ export class EditorModal {
         this.banner.style.display = 'none';
         this.modal.appendChild(this.banner);
 
-        // Keyboard escape handler
+        this.shortcutOverlay = document.createElement('div');
+        this.shortcutOverlay.className = 'gte-shortcuts';
+        this.shortcutOverlay.style.display = 'none';
+        this.shortcutOverlay.addEventListener('click', (e) => {
+            if (e.target === this.shortcutOverlay) this.hideShortcuts();
+        });
+
+        this.shortcutPanel = document.createElement('div');
+        this.shortcutPanel.className = 'gte-shortcuts__panel';
+        this.shortcutPanel.setAttribute('role', 'dialog');
+        this.shortcutPanel.setAttribute('aria-modal', 'true');
+        this.shortcutPanel.setAttribute('aria-label', 'Keyboard shortcuts');
+
+        const shortcutTitle = document.createElement('h3');
+        shortcutTitle.className = 'gte-shortcuts__title';
+        shortcutTitle.textContent = 'Keyboard shortcuts';
+        this.shortcutPanel.appendChild(shortcutTitle);
+
+        const shortcutList = document.createElement('dl');
+        shortcutList.className = 'gte-shortcuts__list';
+        const entries = [
+            ['Cmd/Ctrl + S', 'Save and upload changes'],
+            ['Esc', 'Close modal (asks before discarding changes)'],
+            ['Arrow Up/Down', 'Move selection in file tree'],
+            ['Arrow Right', 'Open selected folder in file tree'],
+            ['Arrow Left', 'Close selected folder in file tree'],
+            ['Enter / Space', 'Toggle selected folder or open selected file'],
+            ['F2', 'Rename selected tree item'],
+            ['Delete', 'Delete selected tree item']
+        ];
+        for (const [key, desc] of entries) {
+            const dt = document.createElement('dt');
+            dt.textContent = key;
+            const dd = document.createElement('dd');
+            dd.textContent = desc;
+            shortcutList.appendChild(dt);
+            shortcutList.appendChild(dd);
+        }
+        this.shortcutPanel.appendChild(shortcutList);
+
+        const shortcutNote = document.createElement('p');
+        shortcutNote.className = 'gte-shortcuts__note';
+        shortcutNote.textContent = 'Tree shortcuts work when the file tree is focused.';
+        this.shortcutPanel.appendChild(shortcutNote);
+
+        const shortcutCopyright = document.createElement('p');
+        shortcutCopyright.className = 'gte-shortcuts__copyright';
+        shortcutCopyright.appendChild(document.createTextNode('Copyright (c) 2026 Synaps Media. Licensed under the MIT License. '));
+        const licenseLink = document.createElement('a');
+        licenseLink.className = 'gte-shortcuts__copyright-link';
+        licenseLink.href = 'https://github.com/synapsmedia/ghost-theme-editor/blob/main/LICENSE';
+        licenseLink.target = '_blank';
+        licenseLink.rel = 'noopener noreferrer';
+        licenseLink.textContent = 'View license';
+        shortcutCopyright.appendChild(licenseLink);
+        this.shortcutPanel.appendChild(shortcutCopyright);
+
+        const closeShortcutsBtn = document.createElement('button');
+        closeShortcutsBtn.type = 'button';
+        closeShortcutsBtn.className = 'gte-btn gte-btn--ghost';
+        closeShortcutsBtn.textContent = 'Close';
+        closeShortcutsBtn.addEventListener('click', () => this.hideShortcuts());
+        this.shortcutPanel.appendChild(closeShortcutsBtn);
+
+        this.shortcutOverlay.appendChild(this.shortcutPanel);
+        this.modal.appendChild(this.shortcutOverlay);
+
+        // Keyboard handler
         this.onKeydown = (e) => {
+            const isModifierSave = (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 's';
+            if (isModifierSave) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleSave();
+                return;
+            }
+
             if (e.key === 'Escape') {
                 e.stopPropagation();
+                if (this.shortcutOverlay.style.display !== 'none') {
+                    this.hideShortcuts();
+                    return;
+                }
                 this.requestClose();
             }
         };
@@ -171,7 +259,7 @@ export class EditorModal {
 
         // Auto-select a sensible default: package.json if present, else first editable file
         const preferred = this.pickDefaultFile();
-        if (preferred) this.selectFile(preferred);
+        if (preferred) this.selectFile(preferred, {focusEditor: true});
 
         this.updateDirtyBadge();
     }
@@ -221,12 +309,12 @@ export class EditorModal {
 
     // ---------- Editing ----------
 
-    selectFile(path) {
+    selectFile(path, {focusEditor = false} = {}) {
         if (!this.tree) return;
         const file = this.tree.files[path];
         if (!file || !file.editable) return;
         this.activePath = path;
-        this.fileEditor.setFile(path, file.content ?? '');
+        this.fileEditor.setFile(path, file.content ?? '', {focus: focusEditor});
         this.fileTree.refresh();
     }
 
@@ -305,8 +393,8 @@ export class EditorModal {
             for (const f of Object.values(this.tree.files)) {
                 if (f.editable) {
                     f.original = f.content;
-                    f.modified = false;
                 }
+                f.modified = false;
             }
             this.deletedCount = 0;
             this.status = 'ready';
@@ -315,7 +403,6 @@ export class EditorModal {
             this.hideBanner();
             showToast(`Theme "${uploadName}" uploaded successfully.`, 'success');
             this.cancelBtn.disabled = false;
-            this.close();
         } catch (err) {
             this.status = 'ready';
             this.cancelBtn.disabled = false;
@@ -499,6 +586,22 @@ export class EditorModal {
         this.banner.textContent = '';
     }
 
+    toggleShortcuts() {
+        if (this.shortcutOverlay.style.display === 'none') {
+            this.showShortcuts();
+        } else {
+            this.hideShortcuts();
+        }
+    }
+
+    showShortcuts() {
+        this.shortcutOverlay.style.display = 'flex';
+    }
+
+    hideShortcuts() {
+        this.shortcutOverlay.style.display = 'none';
+    }
+
     // ---------- Close ----------
 
     requestClose() {
@@ -514,6 +617,7 @@ export class EditorModal {
     }
 
     close() {
+        this.hideShortcuts();
         this.root.removeEventListener('keydown', this.onKeydown);
         this.root.remove();
         document.body.style.overflow = this.prevBodyOverflow ?? '';

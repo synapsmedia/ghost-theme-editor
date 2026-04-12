@@ -113,7 +113,6 @@ export class FileEditor {
             model.setValue(content ?? '');
         }
         this._editor.setModel(model);
-        this._editor.focus();
     }
 
     renderBreadcrumb(path) {
@@ -143,7 +142,7 @@ export class FileEditor {
      * Returns a Promise that resolves once the model is set, but callers may
      * treat it as fire-and-forget.
      */
-    async setFile(path, content) {
+    async setFile(path, content, {focus = false} = {}) {
         this.currentPath = path;
 
         if (path === null) {
@@ -164,6 +163,7 @@ export class FileEditor {
         // requested path rather than the one that triggered this call.
         if (this.currentPath !== null) {
             this._applyFile(this.currentPath, content);
+            if (focus) this._editor.focus();
         }
     }
 
