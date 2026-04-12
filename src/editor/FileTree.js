@@ -204,7 +204,7 @@ export class FileTree {
             return;
         }
 
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             if (!this.selectedPath || !this.selectedType) return;
             if (this.selectedType === 'dir') {

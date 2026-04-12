@@ -139,7 +139,7 @@ export class EditorModal {
             ['Arrow Up/Down', 'Move selection in file tree'],
             ['Arrow Right', 'Open selected folder in file tree'],
             ['Arrow Left', 'Close selected folder in file tree'],
-            ['Enter', 'Toggle selected folder or open selected file'],
+            ['Enter / Space', 'Toggle selected folder or open selected file'],
             ['F2', 'Rename selected tree item'],
             ['Delete', 'Delete selected tree item']
         ];
