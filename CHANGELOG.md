@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.2.2...v0.3.0) (2026-04-12)
+
+
+### Features
+
+* improve keyboard workflow in editor modal ([#1](https://github.com/synapsmedia/ghost-theme-editor/issues/1)) ([7857b1b](https://github.com/synapsmedia/ghost-theme-editor/commit/7857b1bb9e687a01817dbba08516252454ec138f))
+
 ## [0.2.2](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.2.1...v0.2.2) (2026-04-12)
 
 
