@@ -2,13 +2,13 @@
  * Loads Monaco Editor from the jsdelivr CDN exactly once, returning a promise
  * that resolves to the `window.monaco` object.
  *
- * Uses Monaco's own AMD loader (`vs/loader.js`). We intentionally do NOT
- * restore `window.require`/`window.define` after loading because Monaco
- * registers language tokenizers lazily via AMD after the initial load; if the
- * AMD system is torn down, those registrations silently fail and syntax
- * highlighting is lost. Ghost Admin's Ember modules are fully initialized at
- * page-load time and do not rely on `window.require` at runtime, so leaving
- * Monaco's AMD loader in place is safe.
+ * Uses Monaco's own AMD loader (`vs/loader.js`). After Monaco finishes loading
+ * we restore `window.require` to a proxy that routes AMD-style calls (array
+ * deps + callback) to Monaco's AMD loader and CommonJS-style calls (string) to
+ * the original Ghost Admin / Ember `require`. This prevents the
+ * "Unrecognized require call" errors that occur when Ghost Admin's Ember vendor
+ * bundle calls `require('some-ember-module')` and encounters Monaco's AMD
+ * loader instead of the original one.
  *
  * Workers are spun up via a blob-URL `importScripts()` pattern so that
  * cross-origin CDN scripts are allowed in all modern browsers.
@@ -27,6 +27,10 @@ export function loadMonaco() {
 
 async function _load() {
     if (window.monaco) return window.monaco;
+
+    // Preserve the original window.require (Ghost Admin / Ember loader) before
+    // Monaco's loader.js overwrites it with its own AMD require.
+    const originalRequire = window.require;
 
     // Workers loaded from a CDN URL need to run importScripts() via a blob so
     // the browser treats them as same-origin.
@@ -62,6 +66,20 @@ async function _load() {
     await new Promise((resolve, reject) => {
         monacoRequire(['vs/editor/editor.main'], resolve, reject);
     });
+
+    // Restore window.require as a proxy so Ghost Admin's Ember modules
+    // continue to work. AMD-style calls (array deps) go to Monaco; CommonJS-
+    // style calls (string) go to the original Ember require.
+    if (originalRequire) {
+        window.require = function proxyRequire(deps, callback, errback) {
+            if (Array.isArray(deps)) {
+                return monacoRequire(deps, callback, errback);
+            }
+            return originalRequire(deps);
+        };
+        // Copy over any properties the original require had (e.g. .entries)
+        Object.assign(window.require, originalRequire);
+    }
 
     return window.monaco;
 }
