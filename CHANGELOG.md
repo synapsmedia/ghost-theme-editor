@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.2.1...v0.2.2) (2026-04-12)
+
+
+### Bug Fixes
+
+* don't intercept ember amd loader ([b723ce2](https://github.com/synapsmedia/ghost-theme-editor/commit/b723ce2875e93169f0f717735e46f821916fc1ad))
+
 ## [0.2.1](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.2.0...v0.2.1) (2026-04-12)
 
 
