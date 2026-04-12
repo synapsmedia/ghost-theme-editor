@@ -45,6 +45,8 @@ jobs:
           url: |
             https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor/dist/ghost-theme-editor.js
             https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor/dist/ghost-theme-editor.min.js
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@latest/dist/ghost-theme-editor.js
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@latest/dist/ghost-theme-editor.min.js
             https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@0/dist/ghost-theme-editor.js
             https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@0/dist/ghost-theme-editor.min.js
 
