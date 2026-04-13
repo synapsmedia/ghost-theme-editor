@@ -1,3 +1,10 @@
+## [0.4.3](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.4.2...v0.4.3) (2026-04-13)
+
+
+### Bug Fixes
+
+* removed misleading message about automatic backup ([6996e51](https://github.com/synapsmedia/ghost-theme-editor/commit/6996e518da8cad81acb4eff52c76ac4247069be5))
+
 ## [0.4.2](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.4.1...v0.4.2) (2026-04-13)
 
 
