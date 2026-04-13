@@ -558,7 +558,7 @@ export class EditorModal {
 
         const confirmMessage = isRename
             ? `"${this.themeName}" is a built-in Ghost theme and cannot be overwritten.\n\nYour changes will be uploaded as a new theme called "${uploadName}".\n\nDo you want to continue?`
-            : `Upload ${count} modified file${count === 1 ? '' : 's'} and replace the "${this.themeName}" theme on this Ghost install?\n\nGhost will keep a backup of the previous version automatically.`;
+            : `Upload ${count} modified file${count === 1 ? '' : 's'} and replace the "${this.themeName}" theme on this Ghost install?`;
 
         const proceed = window.confirm(confirmMessage);
         if (!proceed) return;
