@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.4.1...v0.4.2) (2026-04-13)
+
+
+### Bug Fixes
+
+* stop keydown events leaking out of editor modal ([b300ff7](https://github.com/synapsmedia/ghost-theme-editor/commit/b300ff7fd5a395f845870ad1345b3cf35f98f42b))
+
 ## [0.4.1](https://github.com/synapsmedia/ghost-theme-editor/compare/v0.4.0...v0.4.1) (2026-04-12)
 
 

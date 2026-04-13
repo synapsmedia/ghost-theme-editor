@@ -1,6 +1,6 @@
 {
   "name": "@synapsmedia/ghost-theme-editor",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A browser-based Ghost theme editor injected into Ghost Admin via clientExtensions.",
   "license": "MIT",
   "private": false,
