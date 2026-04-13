@@ -285,16 +285,19 @@ export class EditorModal {
 
         // Keyboard handler
         this.onKeydown = (e) => {
+            // Stop all keydown events from leaking out of the modal so that
+            // host-page global shortcuts (e.g. Ghost admin's "/" for search)
+            // don't fire while the editor is open.
+            e.stopPropagation();
+
             const isModifierSave = (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 's';
             if (isModifierSave) {
                 e.preventDefault();
-                e.stopPropagation();
                 this.handleSave();
                 return;
             }
 
             if (e.key === 'Escape') {
-                e.stopPropagation();
                 if (this.reviewOverlay.style.display !== 'none') {
                     this.hideReview();
                     return;
