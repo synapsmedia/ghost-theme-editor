@@ -27,7 +27,7 @@ Open `config.production.json` and add:
 {
   "clientExtensions": {
     "script": {
-      "src": "https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor/dist/ghost-theme-editor.js",
+      "src": "https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@0/dist/ghost-theme-editor.js",
       "container": "<div id=\"ghost-theme-editor-root\"></div>"
     }
   }
@@ -37,8 +37,11 @@ Open `config.production.json` and add:
 To pin to a specific version (recommended for production stability):
 
 ```jsonc
-"src": "https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@1.0.0/dist/ghost-theme-editor.js"
+"src": "https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-theme-editor@{version}/dist/ghost-theme-editor.js"
 ```
+
+> [!WARNING]
+> Change `{version}` with your desired version, like `0.4.3`.
 
 ### 2. Restart Ghost
 
