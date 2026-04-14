@@ -82,8 +82,8 @@ Open DevTools → Console to confirm:
 │  │       │                │        │  ├─ Repack + upload      │  │
 │  │  Save & Upload         │        │  │   to Admin API        │  │
 │  └────────────────────────┘        │  └─ Ghost replaces theme │  │
-│                                    │     (old version kept    │  │
-│                                    │      as backup)          │  │
+│                                    └──────────────────────────┘  │
+│                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -117,7 +117,7 @@ Ghost's `clientExtensions.script` config lets an operator specify a JavaScript f
    - You'll be asked to confirm the number of changed/added/deleted files.
    - The modified tree is repacked as a ZIP (JSZip, DEFLATE).
    - The ZIP is uploaded as `multipart/form-data` to `/ghost/api/admin/themes/upload`.
-   - Ghost renames the existing theme folder as a backup, extracts the new ZIP, and re-activates the theme if it was active.
+   - Ghost extracts the new ZIP, and re-activates the theme if it was active.
    - If you're editing a default Ghost theme (`casper`, `source`), the upload is redirected to `<theme>-edited` — a new theme is created with your changes while the original is left untouched.
 8. Cancel / press Esc / click the backdrop to close. Unsaved changes prompt for confirmation before discarding.
 
@@ -202,7 +202,7 @@ Default Ghost themes (`casper`, `source`) cannot be overwritten. The editor will
 ## Limitations
 
 - **Diff is text-only.** Editable text files support diff/review. Binary files are preserved byte-for-byte, but visual/binary diffs are not shown.
-- **No multi-user coordination.** If two people edit the same theme simultaneously, last writer wins. Ghost's backup-on-replace means the previous version is recoverable but not automatically merged.
+- **No multi-user coordination.** If two people edit the same theme simultaneously, last writer wins.
 - **Theme validation is server-side.** Ghost's theme validator runs on upload. If your edits produce an invalid theme, the error messages are surfaced in the editor's banner so you can fix and retry.
 - **In-memory only.** Everything runs in browser memory, so the tab must stay open during editing. For very large themes with many binary assets, the initial download and extract may be slow.
 
