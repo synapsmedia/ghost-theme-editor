@@ -1,5 +1,8 @@
 # Ghost Theme Editor
 
+> [!WARNING]
+> This repository has been archived in favor of the built-in theme editor now integrated into Ghost core. Inspired by this implementation, the theme editor was rapidly incorporated into Ghost core thanks to the efforts of John and Hannah in [this pull request](https://github.com/TryGhost/Ghost/pull/27656). Read the announcement here: https://ghost.org/changelog/theme-editor/
+
 <img width="2736" height="1824" alt="Screenshot of Ghost Theme Editor running in diff mode" src="https://github.com/user-attachments/assets/9e9439c1-2bfc-4fc9-addd-3c1d57ec7473" />
 
 A browser-based [Ghost](https://github.com/TryGhost/Ghost) theme editor that injects itself into Ghost Admin and lets you edit, create, rename, and delete theme files directly in your browser — no ZIP downloads, no local tooling, no redeploy cycle. Useful for live fixes, quick tweaks, and authoring themes on any device.
